@@ -1,14 +1,5 @@
-<script>
-    import ProductList from './components/ProductList.svelte';
-    import OrderForm from './components/OrderForm.svelte';
-</script>
-
 <main>
-    <h1>Product List</h1>
-    <ProductList />
-
-    <h2>Place an Order</h2>
-    <OrderForm />
+    <h1>Nimble Store</h1>
 </main>
 
 <style>
