@@ -43,11 +43,20 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    # Third-party
+    "rest_framework",
+    "corsheaders",
+    # Domain apps
     "checkout",
+    "products",
+    "orders",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    # CorsMiddleware must come before CommonMiddleware so the CORS headers
+    # are injected before Django can short-circuit with a 4xx response.
+    "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -121,6 +130,12 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.BasicAuthentication",
     ],
 }
+
+# CORS — allow the Svelte dev server to call the Django API.
+# In production this would be replaced with the actual frontend origin.
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:8080",
+]
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
