@@ -1,0 +1,204 @@
+{
+  "info": {
+    "name": "NimbleStore Backend",
+    "description": "Colección para probar principalmente el backend de NimbleStore (productos y órdenes).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "f3b7c5a1-17f4-4df5-90c4-4f6b4f8b3f11"
+  },
+  "item": [
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "List Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products", ""]
+            },
+            "description": "Lista todos los productos"
+          }
+        },
+        {
+          "name": "Create Product",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "const json = pm.response.json();",
+                  "if (json && json.id) {",
+                  "    pm.collectionVariables.set('productId', json.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Teclado Mecanico\",\n  \"price\": \"89.90\",\n  \"stock\": 25\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/products/",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products", ""]
+            },
+            "description": "Crea un producto y guarda su id en productId"
+          }
+        },
+        {
+          "name": "Get Product by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/{{productId}}/",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products", "{{productId}}", ""]
+            },
+            "description": "Obtiene un producto por id"
+          }
+        },
+        {
+          "name": "Patch Product Stock",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"stock\": 20\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/products/{{productId}}/",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products", "{{productId}}", ""]
+            },
+            "description": "Actualiza parcialmente un producto"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "item": [
+        {
+          "name": "List Orders",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "orders", ""]
+            },
+            "description": "Lista todas las órdenes"
+          }
+        },
+        {
+          "name": "Create Order",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "const json = pm.response.json();",
+                  "if (json && json.id) {",
+                  "    pm.collectionVariables.set('orderId', json.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    {\n      \"product_id\": {{productId}},\n      \"quantity\": 2\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "orders", ""]
+            },
+            "description": "Crea una orden y guarda su id en orderId"
+          }
+        },
+        {
+          "name": "Get Order by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/{{orderId}}/",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "orders", "{{orderId}}", ""]
+            },
+            "description": "Obtiene una orden por id"
+          }
+        },
+        {
+          "name": "Cancel Order",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/{{orderId}}/cancel/",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "orders", "{{orderId}}", "cancel", ""]
+            },
+            "description": "Cancela la orden indicada"
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "productId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "orderId",
+      "value": "1",
+      "type": "string"
+    }
+  ]
+}
