@@ -1,14 +1,19 @@
 <script>
   import { onMount } from "svelte";
   import { api } from "../api.js";
-  import { addToCart, cartCount } from "../stores.js";
+  import {
+    addToCart,
+    cart,
+    cartCount,
+    removeFromCart,
+    updateCartQuantity,
+  } from "../stores.js";
 
   export let onNavigate;
 
   let products = [];
   let loading = true;
   let error = null;
-  let addedMap = {}; // productId → true (brief feedback)
 
   onMount(async () => {
     try {
@@ -20,12 +25,19 @@
     }
   });
 
-  function handleAdd(product) {
-    addToCart(product);
-    addedMap = { ...addedMap, [product.id]: true };
-    setTimeout(() => {
-      addedMap = { ...addedMap, [product.id]: false };
-    }, 1000);
+  function increment(product) {
+    const current = $cart[product.id]?.quantity ?? 0;
+    if (current === 0) {
+      addToCart(product, 1);
+    } else if (current < product.stock) {
+      updateCartQuantity(product.id, current + 1);
+    }
+  }
+
+  function decrement(product) {
+    const current = $cart[product.id]?.quantity ?? 0;
+    // updateCartQuantity calls removeFromCart when quantity reaches 0
+    updateCartQuantity(product.id, current - 1);
   }
 </script>
 
@@ -49,7 +61,8 @@
   {:else}
     <ul class="product-grid">
       {#each products as product (product.id)}
-        <li class="product-card">
+        {@const qtyInCart = $cart[product.id]?.quantity ?? 0}
+        <li class="product-card" class:in-cart={qtyInCart > 0}>
           <div class="product-info">
             <span class="product-name">{product.name}</span>
             <span class="product-price">${product.price}</span>
@@ -58,13 +71,36 @@
             <span class="stock" class:out-of-stock={product.stock === 0}>
               {product.stock > 0 ? `${product.stock} in stock` : "Out of stock"}
             </span>
-            <button
-              class="add-button"
-              disabled={product.stock === 0}
-              on:click={() => handleAdd(product)}
-            >
-              {addedMap[product.id] ? "Added ✓" : "Add to cart"}
-            </button>
+
+            {#if qtyInCart > 0}
+              <!-- Quantity stepper — replaces the Add button once in cart -->
+              <div class="qty-stepper">
+                <button
+                  class="stepper-btn"
+                  on:click={() => decrement(product)}
+                  aria-label="Remove one {product.name} from cart"
+                >
+                  −
+                </button>
+                <span class="qty-value">{qtyInCart}</span>
+                <button
+                  class="stepper-btn"
+                  disabled={qtyInCart >= product.stock}
+                  on:click={() => increment(product)}
+                  aria-label="Add one more {product.name} to cart"
+                >
+                  +
+                </button>
+              </div>
+            {:else}
+              <button
+                class="add-button"
+                disabled={product.stock === 0}
+                on:click={() => increment(product)}
+              >
+                Add to cart
+              </button>
+            {/if}
           </div>
         </li>
       {/each}
@@ -149,6 +185,11 @@
     flex-direction: column;
     gap: 12px;
     background: #fff;
+    transition: border-color 0.15s;
+  }
+
+  .product-card.in-cart {
+    border-color: #2563eb;
   }
 
   .product-info {
@@ -183,6 +224,7 @@
     color: #999;
   }
 
+  /* ── Add to cart button ── */
   .add-button {
     background: #2563eb;
     color: #fff;
@@ -201,6 +243,50 @@
   .add-button:disabled {
     background: #ccc;
     cursor: not-allowed;
+  }
+
+  /* ── Quantity stepper ── */
+  .qty-stepper {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    border: 1.5px solid #2563eb;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .stepper-btn {
+    background: #fff;
+    border: none;
+    color: #2563eb;
+    width: 32px;
+    height: 32px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    line-height: 1;
+    transition: background 0.1s;
+  }
+
+  .stepper-btn:hover:not(:disabled) {
+    background: #eff6ff;
+  }
+
+  .stepper-btn:disabled {
+    color: #ccc;
+    cursor: not-allowed;
+  }
+
+  .qty-value {
+    min-width: 28px;
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #111;
+    border-left: 1px solid #dbeafe;
+    border-right: 1px solid #dbeafe;
+    padding: 0 4px;
+    line-height: 32px;
   }
 
   .link-button {
