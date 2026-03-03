@@ -76,7 +76,7 @@
           }
         },
         {
-          "name": "Patch Product Stock",
+          "name": "Patch Product",
           "request": {
             "method": "PATCH",
             "header": [
