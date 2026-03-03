@@ -6,6 +6,7 @@ from .serializers import ProductSerializer
 
 class ProductViewSet(
     mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
     mixins.CreateModelMixin,
     mixins.UpdateModelMixin,
     viewsets.GenericViewSet,
